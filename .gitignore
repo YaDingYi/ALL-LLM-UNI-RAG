@@ -1,0 +1,7 @@
+# 其他可能包含密钥的环境变量文件
+.env
+.env.*
+
+Histor/
+models/
+vector_index/
