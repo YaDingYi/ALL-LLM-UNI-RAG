@@ -1,0 +1,42 @@
+[
+  {
+    "role": "user",
+    "content": "3D DRAM是什么"
+  },
+  {
+    "role": "assistant",
+    "content": "根据提供的资料，**3D DRAM 是一种面向高密度、可微缩化的三维 DRAM 技术/架构方向**；资料中称其为“scaled 3D",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 364,
+      "completion_tokens": 512,
+      "total_tokens": 876
+    },
+    "sources": [
+      {
+        "id": "chunk-000512",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 13,
+        "number": 255,
+        "text": "3D DRAM130,131. However, \nseveral challenges remain. Most notably, AOS materials have not yet \nbeen adopted for mass production, so establishing manufacturing \nlines, including contamination-control protocols, remains a major chal-\nlenge. Second, an AOS transistor operates in an accumulation-depleti",
+        "score": 0.6570806141023269
+      },
+      {
+        "id": "chunk-000263",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 1,
+        "number": 6,
+        "text": " realization of scaled 3D DRAM. Although many \nintegration hurdles remain, 3D DRAM is poised to become a crucial \nenabler for next-generation artificial intelligence computing.\n1Department of Materials Science and Engineering and Inter-university Semiconductor Research Center, Seoul \nNational Univer",
+        "score": 0.6384845884758431
+      },
+      {
+        "id": "chunk-000272",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 2,
+        "number": 15,
+        "text": "e in 3D DRAM cells. Finally, 3D DRAM \ntechnologies have the potential to drive the artificial intelligence (AI) \ncomputing era by enabling energy-efficient memory systems.\nTwo-dimensional DRAM architectures\nTwo-dimensional DRAM has a complex architecture that imposes \nscaling limitations below 10 nm",
+        "score": 0.6350100180504064
+      }
+    ]
+  }
+]

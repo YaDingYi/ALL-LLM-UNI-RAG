@@ -1,0 +1,16 @@
+[
+  {
+    "role": "user",
+    "content": "当前文件夹下有哪些文件"
+  },
+  {
+    "role": "assistant",
+    "content": "我无法直接访问你本机或当前工作目录，因此看不到“当前文件夹”里有哪些文件。\n\n你可以在终端运行以下命令查看：\n\n- Windows CMD：`dir /a`\n- Windows PowerShell：`Get-ChildItem -Force`\n- Linux/macOS：`ls -la`\n- Python：`import os; print(os.listdir('.'))`\n\n把输出贴给我，我可以帮你整理文件列表或判断需要哪些文件。",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 35,
+      "completion_tokens": 436,
+      "total_tokens": 471
+    }
+  }
+]

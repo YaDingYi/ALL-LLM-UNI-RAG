@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "description": "第一阶段的5道示范题：助手依据现有C3、C5教材逐条核对的标注，供用户复核，用于学习评估，不代表已测得的系统成绩。",
+  "source_root": "../资料",
+  "source_versions": [
+    {
+      "source": "docs/C3/C3.md",
+      "sha256": "b16c6243594210ba0f75f34ea0d9894e77c2641ddda4f50e792bed724a7e27ab"
+    },
+    {
+      "source": "docs/C5/C5.md",
+      "sha256": "842068d13092e72f2e3edece4f7e27ed53a76e3943f057117ca231b335a0edf6"
+    }
+  ],
+  "cases": [
+    {
+      "id": "eval_001",
+      "category": "直接事实题",
+      "question": "根据教程第三章3.3.4的代码示例，CHUNK_SIZE和OVERLAP_SIZE分别设置为多少？这里问的是教程示例，不是当前应用的配置。",
+      "history": [],
+      "source_scope": ["docs/C3/C3.md"],
+      "answerable": true,
+      "expected_behavior": "answer",
+      "reference_answer": "教程第三章3.3.4的示例将CHUNK_SIZE设置为500，将OVERLAP_SIZE设置为50。",
+      "required_facts": [
+        "教程示例中的CHUNK_SIZE为500。",
+        "教程示例中的OVERLAP_SIZE为50。"
+      ],
+      "gold_evidence": [
+        {
+          "source": "docs/C3/C3.md",
+          "page": null,
+          "line_start": 551,
+          "line_end": 555,
+          "quote": "# 知识库中单段文本长度\nCHUNK_SIZE = 500\n\n# 知识库中相邻文本重合长度\nOVERLAP_SIZE = 50"
+        }
+      ],
+      "annotation_notes": "核对两个变量及其数值，不要求回答与参考答案逐字一致。当前应用默认按300字符切分、重叠50字符；不能把当前应用的300代替教材示例中的500。"
+    },
+    {
+      "id": "eval_002",
+      "category": "同义改写题",
+      "question": "根据教程第三章，把资料切成相邻小段时，为什么要让两段故意保留一部分重复文字？控制这部分重复内容的参数叫什么？",
+      "history": [],
+      "source_scope": ["docs/C3/C3.md"],
+      "answerable": true,
+      "expected_behavior": "answer",
+      "reference_answer": "保留重复文字是为了保持上下文连贯，避免切分丢失上下文信息。控制相邻块共享字符数量的参数是chunk_overlap。",
+      "required_facts": [
+        "相邻片段保留共享文字有助于保持上下文连贯。",
+        "共享文字用于避免切分丢失上下文信息。",
+        "控制这一部分的参数名称是chunk_overlap。"
+      ],
+      "gold_evidence": [
+        {
+          "source": "docs/C3/C3.md",
+          "page": null,
+          "line_start": 519,
+          "line_end": 519,
+          "quote": "chunk_overlap 指两个块之间共享的字符数量，用于保持上下文的连贯性，避免分割丢失上下文信息"
+        }
+      ],
+      "annotation_notes": "题目用“重复文字”描述教材中的共享字符，观察系统能否理解同义表达。不要把减少上下文丢失扩大成“保证检索和回答一定正确”。"
+    },
+    {
+      "id": "eval_003",
+      "category": "多段证据题",
+      "question": "结合教程第三章和第五章：为什么建立知识库时需要切分长文档？如果调整了切分策略，按照第五章的验证原则，应该重新验证哪些案例，目的是避免什么问题？",
+      "history": [],
+      "source_scope": ["docs/C3/C3.md", "docs/C5/C5.md"],
+      "answerable": true,
+      "expected_behavior": "answer",
+      "reference_answer": "长文档可能超过模型支持的上下文长度，使检索内容超出模型处理能力，因此需要切分。调整切分策略属于系统优化，按照第五章的原则，优化后应重新验证验证集中的所有案例，以避免原来表现良好的案例出现能力或效果下降。",
+      "required_facts": [
+        "长文档可能超过模型支持的上下文长度，因此需要切分。",
+        "优化后应重新验证验证集中的所有案例，而不是只验证刚修复的问题。",
+        "重新验证是为了避免系统在原有Good Case上失去能力或表现降级。"
+      ],
+      "gold_evidence": [
+        {
+          "source": "docs/C3/C3.md",
+          "page": null,
+          "line_start": 509,
+          "line_end": 509,
+          "quote": "由于单个文档的长度往往会超过模型支持的上下文，导致检索得到的知识太长超出模型的处理能力，因此，在构建向量知识库的过程中，我们往往需要对文档进行分割，将单个文档按长度或者按固定的规则分割成若干个 chunk，然后将每个 chunk 转化为词向量，存储到向量数据库中。"
+        },
+        {
+          "source": "docs/C5/C5.md",
+          "page": null,
+          "line_start": 27,
+          "line_end": 27,
+          "quote": "我们会将找到的每一个 Bad Case 都加入到我们的验证集中，每一次优化之后，我们会重新对验证集中所有验证案例进行验证，从而保证优化后的 系统不会在原有 Good Case 上失去能力或表现降级。"
+        }
+      ],
+      "annotation_notes": "第一条证据支持切分原因，第二条支持重新验证的范围与目的。把第五章的一般优化原则应用于修改切分策略，是题目要求的推理。只答出切分原因不算完整回答；这里的两个证据项也不自动等于两个Chroma片段。"
+    },
+    {
+      "id": "eval_004",
+      "category": "多轮追问题",
+      "question": "该节示例给它设置的持久化目录是什么？请按原文写出路径。",
+      "history": [
+        {
+          "role": "user",
+          "content": "我们讨论的是教程第三章3.4.2创建的向量库。这个向量库叫什么？"
+        },
+        {
+          "role": "assistant",
+          "content": "这一节创建的是Chroma向量库。"
+        }
+      ],
+      "source_scope": ["docs/C3/C3.md"],
+      "answerable": true,
+      "expected_behavior": "answer",
+      "reference_answer": "教程第三章3.4.2的示例将Chroma的持久化目录设置为../../data_base/vector_db/chroma。",
+      "required_facts": [
+        "教程示例的持久化目录原文是../../data_base/vector_db/chroma。"
+      ],
+      "gold_evidence": [
+        {
+          "source": "docs/C3/C3.md",
+          "page": null,
+          "line_start": 921,
+          "line_end": 922,
+          "quote": "# 定义持久化路径\npersist_directory = '../../data_base/vector_db/chroma'"
+        }
+      ],
+      "annotation_notes": "history是预先固定的前两条消息，不是从Histor中随机取出的聊天，也不包含本轮question。该题检查“它”和“该节”的指代。问题询问教材中的相对路径，不能回答当前应用的.local/chroma。"
+    },
+    {
+      "id": "eval_005",
+      "category": "资料不足题",
+      "question": "仅根据教程第三章C3/C3.md，里面的Chroma知识库在独立标注测试集上的Recall@3实测百分比是多少？请给出该章报告的数值；如果没有报告，请明确说明。",
+      "history": [],
+      "source_scope": ["docs/C3/C3.md"],
+      "answerable": false,
+      "expected_behavior": "abstain",
+      "reference_answer": "第三章没有报告该知识库在独立标注测试集上的Recall@3实测百分比，无法根据该章给出这个数值。示例中的k=3只表示返回3个片段，不能据此计算Recall@3。",
+      "required_facts": [],
+      "gold_evidence": [],
+      "annotation_notes": "这是限定文档范围的缺失信息题，不是声称所有本地文件都没有该信息。已核对C3第三章：3.4.3展示了k=3的检索示例及返回数量，但未提供独立标注测试集、相关片段标注或Recall@3测量值；全文检查Recall、召回、测试集等词也未发现该结果。不存在支持具体百分比的正向证据，因此gold_evidence留空，不能伪造一段“没有报告”的原文。评分检查是否明确说明资料不足且不编造百分比，不强求使用参考答案的完整措辞；也不能把编造的0%或100%判正确。"
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 import document_reader
-from index_demo import build_index, save_index
+from chroma_index import create_index
 
 
 class UploadError(Exception):
@@ -61,7 +61,7 @@ def save_uploaded_files(uploaded_files):
 
 
 def update_knowledge_index(required_sources=(), on_progress=None):
-    '''读取全部资料，生成新索引；返回文件名、数量和读取提示。'''
+    '''读取全部资料，生成新集合；返回集合名称、数量和读取提示。'''
     # 重新读取全部资料，保证新索引不仅包含本次上传的文件。
     documents, warnings = document_reader.read_documents()
     sources = {document["source"] for document in documents}
@@ -74,14 +74,13 @@ def update_knowledge_index(required_sources=(), on_progress=None):
             message += "；" + "；".join(details)
         raise UploadError(message)
 
-    # 全部片段重新向量化；save_index 创建新快照，不覆盖旧索引。
+    # 全部片段重新向量化，写入新的 Chroma 集合，不覆盖旧索引。
     chunks = document_reader.split_documents(documents)
     if not chunks:
         raise UploadError("没有可建立索引的资料片段，请先准备含文字的资料。")
-    index = build_index(chunks, on_progress=on_progress)
-    filename = save_index(index)
+    index = create_index(chunks, on_progress=on_progress)
     return {
-        "filename": filename,
+        "name": index["name"],
         "file_count": index["file_count"],
         "chunk_count": index["chunk_count"],
         "warnings": warnings,

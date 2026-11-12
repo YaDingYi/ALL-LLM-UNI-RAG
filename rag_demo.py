@@ -1,7 +1,6 @@
 '''使用本地索引找到参考资料，准备发送给 DeepSeek 的消息。'''
 
-from index_demo import load_index
-from index_search import search_index
+from chroma_index import search_index
 
 
 class RetrievalError(Exception):
@@ -14,10 +13,9 @@ def prepare_rag_messages(question, conversation, index_filename, top_k=3):
     if not conversation or conversation[-1].get("role") != "user" or conversation[-1].get("content") != question:
         raise RetrievalError("当前问题与会话记录不一致，请重试。")
 
-    # 只使用已保存的本地索引；检索过程不调用 DeepSeek。
+    # 从选中的本地 Chroma 集合检索；检索过程不调用 DeepSeek。
     try:
-        index = load_index(index_filename)
-        references, _ = search_index(question, index, top_k)
+        references, _ = search_index(question, index_filename, top_k)
     except Exception as error:
         raise RetrievalError(f"本地索引检索失败（{type(error).__name__}），请检查索引和向量模型。") from error
 

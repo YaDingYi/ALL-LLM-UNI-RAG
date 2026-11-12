@@ -1,0 +1,86 @@
+[
+  {
+    "role": "user",
+    "content": "RRAM"
+  },
+  {
+    "role": "user",
+    "content": "RRAM"
+  },
+  {
+    "role": "assistant",
+    "content": "你只",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 465,
+      "completion_tokens": 512,
+      "total_tokens": 977
+    },
+    "sources": [
+      {
+        "id": "chunk-002600",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 1,
+        "number": 6,
+        "text": "rge dictionaries for improved compression ratio, while\nCAM-based in-memory parallel search reduces data movement\nand enables energy-eﬃcient and low-latency text compression.\nThe proposed system is validated through a demonstration\nusing a fabricated 1Mb 40nm 1-transistor–1-RRAM (1T1R) chip.\nEvaluati",
+        "score": 0.5100818523889789
+      },
+      {
+        "id": "chunk-002636",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 2,
+        "number": 42,
+        "text": "rgy eﬃciency and a 13.8× reduction in search latency\ncompared with a CPU implementation.\nII. DESIGN OF RRAM-CAM-BASED TEXT COMPRESSION\nSYSTEM\nA. System Workﬂow and RRAM CAM Architecture\nThe workﬂow of the proposed RRAM-CAM-based text\ncompression system is shown in Fig. 3(a). A pre-built\nThis article",
+        "score": 0.5074626984716293
+      },
+      {
+        "id": "chunk-002651",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 3,
+        "number": 57,
+        "text": "ogramming\nthe text “TCAS”.\nFig. 6. (a) Retention test of RRAM device in 105 seconds. (b) Read-disturb\ntest of the RRAM device up to 109 read cycles.\nshows the resistance evolution of low resistance state (LRS)\nand high resistance state (HRS) over 100 AC SET/RESET\ncycles. A clear memory window larger",
+        "score": 0.5020252946269115
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": "RRAM是什么"
+  },
+  {
+    "role": "assistant",
+    "content": "提供的资料**没有直接定义 RRAM 的全称或工作原理**，因此不能据此完整解释“RRAM 是什么”。\n\n从资料中只能确定：\n\n- RRAM 是该研究使用的**存储器件/存储单元**，芯片为 **1Mb、40nm 的 1-transistor–1-RRAM（1T1R）结构**[1]。\n- 研究将 RRAM 与 CAM 结合，构成 **RRAM-CAM**，用于内存内并行",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 473,
+      "completion_tokens": 511,
+      "total_tokens": 984
+    },
+    "sources": [
+      {
+        "id": "chunk-002600",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 1,
+        "number": 6,
+        "text": "rge dictionaries for improved compression ratio, while\nCAM-based in-memory parallel search reduces data movement\nand enables energy-eﬃcient and low-latency text compression.\nThe proposed system is validated through a demonstration\nusing a fabricated 1Mb 40nm 1-transistor–1-RRAM (1T1R) chip.\nEvaluati",
+        "score": 0.5425519018930974
+      },
+      {
+        "id": "chunk-002636",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 2,
+        "number": 42,
+        "text": "rgy eﬃciency and a 13.8× reduction in search latency\ncompared with a CPU implementation.\nII. DESIGN OF RRAM-CAM-BASED TEXT COMPRESSION\nSYSTEM\nA. System Workﬂow and RRAM CAM Architecture\nThe workﬂow of the proposed RRAM-CAM-based text\ncompression system is shown in Fig. 3(a). A pre-built\nThis article",
+        "score": 0.5413932814659843
+      },
+      {
+        "id": "chunk-002639",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 3,
+        "number": 45,
+        "text": "WU et al.: ENERGY-EFFICIENT AND LOW-LATENCY RRAM-CAM-BASED IN-MEMORY TEXT COMPRESSION SYSTEM\n3\nFig. 4. Photo of test platform and the fabricated 1Mb RRAM chip.\ndictionary is ﬁrst generated oﬄine using byte pair encoding\n(BPE), which identiﬁes frequently recurring byte sequences\nand selects them as d",
+        "score": 0.5295634365713954
+      }
+    ]
+  }
+]

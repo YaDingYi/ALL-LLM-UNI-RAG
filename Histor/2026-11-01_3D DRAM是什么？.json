@@ -1,0 +1,46 @@
+[
+  {
+    "role": "user",
+    "content": "3D DRAM是什么？"
+  },
+  {
+    "role": "user",
+    "content": "2026-11-01_3D DRAM是什么？"
+  },
+  {
+    "role": "assistant",
+    "content": "参考资料没有给出“3D DRAM”的完整标准定义，但可以据此说明：\n\n**3D DRAM 一般指采用三维堆叠/三维阵列结构的 DRAM**，其目的之一是提升存储密度：资料在讨论 3D DRAM 时，将其位密度与基于约 10 nm 技术节点的 2D DRAM 预测位密度进行比较[2]。相关技术涉及阵列晶体管结构（如 SRCAT/BCAT）[2]，以及 AOS 材料等新型材料与器件方案；但 AOS 材料尚未进入大规模量产，制造线和污染控制等仍是挑战[1]。\n\n资料还给出一个具体研究方向：**3D 堆叠 IGZO 2T0C DRAM 阵列**，具备多比特能力，面向存内计算应用[3]。\n\n因此，按现有资料可概括为：**3D DRAM 是通过三维堆叠/三维阵列提升 DRAM 密度的一类技术方向，涉及新型材料、晶体管结构和堆叠阵列，并可探索多比特存储与存内计算等应用；但资料未提供其完整定义和产业化现状。**",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 437,
+      "completion_tokens": 420,
+      "total_tokens": 857
+    },
+    "sources": [
+      {
+        "id": "chunk-000512",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 13,
+        "number": 255,
+        "text": "3D DRAM130,131. However, \nseveral challenges remain. Most notably, AOS materials have not yet \nbeen adopted for mass production, so establishing manufacturing \nlines, including contamination-control protocols, remains a major chal-\nlenge. Second, an AOS transistor operates in an accumulation-depleti",
+        "score": 0.695553675666629
+      },
+      {
+        "id": "chunk-000381",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 7,
+        "number": 124,
+        "text": " of 3D DRAM. The plotted values are extracted from \nreported studies17,24,48. The bit density of 2D DRAM is projected based on ~10-nm \ntechnology node24,72. d, The saddle-fin recessed channel access transistor \n(SRCAT)51 corresponds to the buried cell array transistor (BCAT) structure \ndescribed her",
+        "score": 0.6552658503795553
+      },
+      {
+        "id": "chunk-001527",
+        "source": "3D DRAM/sciadv.adu4323.pdf",
+        "page": 9,
+        "number": 190,
+        "text": "3D stacked IGZO 2T0C DRAM array with multibit capability for computing in\nmemory applications\nQijun Li, Qianlan Hu, Shenwu Zhu, Min Zeng, Wenjie Zhao, and Yanqing Wu\nSci. Adv. 11 (21), eadu4323.  DOI: 10.1126/sciadv.adu4323\nView the article online\nhttps://www.science.org/doi/10.1126/sciadv.adu4323\nP",
+        "score": 0.6509941305451669
+      }
+    ]
+  }
+]

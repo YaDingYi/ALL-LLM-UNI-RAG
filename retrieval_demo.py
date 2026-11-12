@@ -1,11 +1,10 @@
 '''在本机逐段比较问题和资料，找出相似度最高的片段。'''
 
 import embedding_demo
-from embedding_demo import embed_texts
+from embedding_demo import QUERY_PREFIX, embed_texts
 from similarity_demo import cosine_similarity
 
-# BGE 检索模型建议在“问题”前加上提示，资料原文不加。
-QUERY_PREFIX = "为这个句子生成表示以用于检索相关文章："
+# QUERY_PREFIX 从嵌入模块导入，也保留给此前引用此名称的学习代码使用。
 BATCH_SIZE = 16
 
 

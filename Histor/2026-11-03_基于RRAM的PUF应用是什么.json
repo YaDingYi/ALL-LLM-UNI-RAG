@@ -1,0 +1,43 @@
+[
+  {
+    "role": "user",
+    "content": "基于RRAM的PUF应用是什么"
+  },
+  {
+    "role": "assistant",
+    "content": "根据资料，基于 RRAM 的 PUF 主要应用于**安全 AI 计算/安全存内计算（CIM）芯片**：\n\n- 将 ReRAM-PUF 融合进 ReRAM CIM 芯片，以较小面积开销增强 CIM 芯片安全性，并形成名为 “RePACK” 的安全 CIM 方案[3]。\n- 构建与 ReRAM-PUF 兼容的 CIM 核心结构，用差分对存储单个权重，并根据 BS code 分别存储权重的正、负部分[1]。\n- 利用 PUF 响应/码位进行加密；资料提到三层加密可增加 PUF 码位，提高对枚举等攻击的安全性，BS code 还支持重叠多重加密[2]。\n\n因此，资料中体现的应用方向是：**把 RRAM-PUF 用于 CIM 芯片的安全保护与加密，保障 AI 计算安全**。资料未提及其他具体应用场景。",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 422,
+      "completion_tokens": 598,
+      "total_tokens": 1020
+    },
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "id": "chunk-003243",
+        "source": "RRAM/02_领域期刊及综述/2025_NatCommun_PUF_private_data.pdf",
+        "page": 6,
+        "number": 105,
+        "text": "CIM with\nReRAM-PUF, we develop a ReRAM-PUF-compatible CIM core struc-\nture. It uses a differential pair to store a single weight similar to the\nprior works15,51. The positive and negative parts of each weight are\nstored separately in the CIM core according to the BS code. Each bit of\nPUF response is",
+        "score": 0.511053740978241
+      },
+      {
+        "id": "chunk-003307",
+        "source": "RRAM/02_领域期刊及综述/2025_NatCommun_PUF_private_data.pdf",
+        "page": 10,
+        "number": 169,
+        "text": "erent PUF responses for the\nthree levels of encryptions. Threefold encryption can induce more PUF\ncode bits on a certain neural network scale and thus increase the safety\nagainst enumeration or other attacks. Different from other encryption\ntechniques, the BS code enables overlapping multiple encryp",
+        "score": 0.501811683177948
+      },
+      {
+        "id": "chunk-003168",
+        "source": "RRAM/02_领域期刊及综述/2025_NatCommun_PUF_private_data.pdf",
+        "page": 2,
+        "number": 30,
+        "text": "on of integrating PUF and CIM cores is needed to provide safe AI\ncomputation.\nIn this article, we fuse ReRAM-based PUF into a ReRAM CIM chip,\nwhich enhances the safety of the ReRAM CIM chip with minimal area\noverhead. We present “RePACK”, a safe CIM scheme that fundamen-\ntally deploys the PUF into a",
+        "score": 0.49290931224823
+      }
+    ]
+  }
+]

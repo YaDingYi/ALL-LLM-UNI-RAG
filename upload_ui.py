@@ -2,6 +2,7 @@
 
 import streamlit as st
 
+from document_monitor_ui import render_document_check
 from knowledge_upload import UploadError, save_uploaded_files, update_knowledge_index
 
 
@@ -18,6 +19,9 @@ def clear_old_previews():
 
 def render_upload_ui():
     '''显示上传和更新按钮，成功后选择新索引用于知识库问答。'''
+    # 首次打开服务网页时检查资料；缓存结果避免每次聊天都扫描磁盘。
+    render_document_check()
+
     with st.expander("📤 上传资料并更新知识库", expanded=True):
         st.caption("支持 TXT、Markdown、PDF 和 Word（.docx）。选择文件后点击上传按钮；文件保存到资料/上传。")
         st.caption("更新会重新读取全部资料并生成所有片段的向量，资料较多时可能耗时；上传和建索引都在本机完成。")
@@ -52,7 +56,7 @@ def render_upload_ui():
 
                 # 在下面的聊天控件创建之前，切换模式并选中新索引。
                 st.session_state["chat_mode_choice"] = "知识库问答"
-                st.session_state["rag_index_choice"] = result["filename"]
+                st.session_state["rag_index_choice"] = result["name"]
                 st.session_state["upload_update_status"] = {
                     "ok": True, "saved": saved, "result": result,
                 }
@@ -77,7 +81,7 @@ def render_upload_ui():
                 st.text("本次已保存：" + "、".join(status["saved"]))
             if status["ok"]:
                 result = status["result"]
-                st.success(f"知识库已更新：读取 {result['file_count']} 个文件，生成 {result['chunk_count']} 个片段；更新时自动选用新索引 {result['filename']}。")
+                st.success(f"知识库已更新：读取 {result['file_count']} 个文件，生成 {result['chunk_count']} 个片段；更新时自动选用新集合 {result['name']}。")
                 for warning in result["warnings"]:
                     st.warning(f"{warning['source']}：{warning['message']}")
             else:

@@ -6,6 +6,8 @@ from pathlib import Path
 # 本地模型名称和模型文件所在目录。
 MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 MODEL_DIR = Path(__file__).resolve().parent / "models" / "bge-small-zh-v1.5"
+# BGE 检索短问题时使用的提示；资料片段原文不加此前缀。
+QUERY_PREFIX = "为这个句子生成表示以用于检索相关文章："
 
 # 标记当前模型及调用流程输出的向量是否已做 L2 归一化。
 # 当前 FastEmbed 流程已归一化，因此为 True；换模型或调用方式时应重新确认。

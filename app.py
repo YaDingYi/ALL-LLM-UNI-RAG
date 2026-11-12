@@ -1,57 +1,47 @@
+'''Streamlit 入口：上传并更新知识库、管理对话历史、调用 DeepSeek 回答。
+
+页面每次交互会重新执行本文件；对话和选择状态由 st.session_state 保存。
+知识库构建、检索和历史文件读写分别委托给对应模块，完整流程见 README。
+'''
+
+# command line: python -m streamlit run app.py --server.address 127.0.0.1 --server.port 8503
 # 导入定位配置文件、读取配置和调用模型所需的工具。
 from pathlib import Path
-from copy import deepcopy
 from dotenv import dotenv_values
-from openai import OpenAI
+from openai import NOT_GIVEN, OpenAI
 import httpx
 import streamlit as st
 from history import create_history, list_history_files, load_history, save_history
-from document_reader import render_document_preview
-from embedding_demo import render_embedding_demo
-from similarity_demo import render_similarity_demo
-from retrieval_demo import render_retrieval_demo
-from index_demo import list_indexes, render_index_demo
-from index_search import render_index_search
+from chat_ui import show_message
+from chroma_index import list_indexes
 from rag_demo import RetrievalError, prepare_rag_messages
 from upload_ui import render_upload_ui
-from rag_trace import render_rag_trace
 
 # 对可重试的请求错误，除首次请求外最多再尝试 5 次。
 MAX_RETRIES = 5
+# 思考过程也占用输出 Token；知识库问答通常更复杂，给予更高的输出上限。
+CHAT_MAX_TOKENS = 512
+RAG_MAX_TOKENS = 8192
 
+
+class EmptyModelAnswerError(Exception):
+    '''模型没有返回可显示的最终回答。'''
+
+# 一、设置网页并显示上传与知识库更新入口。
 # 设置浏览器标签页和页面布局。
 st.set_page_config(page_title="知识库助手 · 学习版", page_icon="📚", layout="wide")
 
 # 显示网页标题与说明。
 st.title("📚 我的知识库助手")
-st.caption("第七步：上传资料并更新知识库")
-
-# 显示配置的重试上限；SDK 在后台重试，不逐次显示当前次数。
-st.caption(f"请求遇到可重试错误时，最多自动重试 {MAX_RETRIES} 次。")
+st.caption("上传资料，选择对话模式，开始提问。")
 
 # 在页面顶部提供上传入口；具体处理位于 upload_ui.py。
 render_upload_ui()
 
-# 显示单段文字向量化演示；具体实现位于 embedding_demo.py。
-render_embedding_demo()
-
-# 显示两段文字的相似度演示；具体实现位于 similarity_demo.py。
-render_similarity_demo()
-
-# 显示本地资料读取和切分预览；具体实现位于 document_reader.py。
-render_document_preview()
-
-# 显示资料片段比较演示；具体实现位于 retrieval_demo.py。
-render_retrieval_demo()
-
-# 显示本地向量索引构建与查看界面。
-render_index_demo()
-
-# 使用已保存的本地索引查找相关片段。
-render_index_search()
-
+# 二、读取 API Key，并初始化或切换本地对话历史。
 # 读取当前项目目录中的配置文件；Key 不显示在页面上。
-config_path = Path(__file__).resolve().parent / ".env.local"
+config_path = Pat
+h(__file__).resolve().parent / ".env.local"
 config = dotenv_values(config_path)
 api_key = (config.get("DEEPSEEK_API_KEY") or "").strip()
 
@@ -105,8 +95,6 @@ if selected_file != st.session_state["active_history_file"]:
 
     # 清除上一段对话的提示；如果没有 chat_notice，默认返回 None，不会报错。
     st.session_state.pop("chat_notice", None)
-    # 切换对话后，不能把上一段对话的检索过程当作当前对话。
-    st.session_state.pop("rag_trace", None)
 
 if not st.session_state["active_history_file"]:
     st.caption("当前是新对话；提交第一个问题后会创建历史文件。")
@@ -123,55 +111,18 @@ if "chat_notice" in st.session_state:
 if not api_key:
     st.warning("请先在当前项目的 .env.local 中填写 DEEPSEEK_API_KEY。")
 
-def show_message(message):
-    '''显示一条消息；助手回答还显示保存的模型名称和 Token 用量。'''
-    with st.chat_message(message["role"]):
-        st.text(message["content"])
-        if message["role"] == "assistant":
-            # 模型名称来自接口返回的 response.model，不是根据回答内容推测的。
-            model_name = message.get("model")
-            if isinstance(model_name, str) and model_name.strip():
-                st.caption(f"返回模型：{model_name}")
-            elif "model" in message:
-                st.caption("本次请求未返回模型名称。")
-            # 旧历史可能没有 usage；新回答在接口未返回用量时会保存 None。
-            usage = message.get("usage")
-            if isinstance(usage, dict) and all(
-                key in usage for key in ("prompt_tokens", "completion_tokens", "total_tokens")
-            ):
-                st.caption(
-                    f"本次 Token 用量：输入 {usage['prompt_tokens']}，"
-                    f"输出 {usage['completion_tokens']}，总计 {usage['total_tokens']}"
-                )
-            elif "usage" not in message:
-                st.caption("历史记录未保存 Token 用量。")
-            else:
-                st.caption("本次请求的 Token 用量不可用。")
-
-            # 参考片段保存在助手消息中，重新加载历史时也能查看。
-            sources = message.get("sources")
-            if isinstance(sources, list) and sources:
-                with st.expander("查看本次参考片段"):
-                    for rank, source in enumerate(sources, start=1):
-                        if not isinstance(source, dict):
-                            continue
-                        page = f" · PDF 第 {source['page']} 页" if source.get("page") is not None else ""
-                        score = source.get("score")
-                        score_text = f" · 相似度 {score:.4f}" if isinstance(score, (int, float)) else ""
-                        st.text(f"[{rank}] 来源：{source.get('source', '未知')}{page}{score_text}")
-                        st.text(source.get("text", ""))
-
-
+# 三、使用统一显示函数呈现历史消息及回答。
 # 按顺序显示已保存的用户消息和助手回答。
 for message in st.session_state["conversation"]:
     show_message(message)
 
-# 查找已经保存的索引；目录无法读取时，普通对话仍可使用。
+# 四、选择普通对话或知识库问答，以及本次要使用的知识库。
+# 查找已经完成的 Chroma 集合；数据库不可用时，普通对话仍可使用。
 try:
     available_indexes = list_indexes()
-except OSError:
+except Exception:
     available_indexes = []
-    st.warning("无法读取向量索引目录，请检查目录权限。")
+    st.warning("无法读取本地 Chroma 知识库，请检查依赖和目录权限。")
 
 # 已有索引时默认进入知识库问答，也可以切换回普通对话。
 chat_mode = st.radio(
@@ -181,10 +132,10 @@ chat_mode = st.radio(
 rag_index = None
 if chat_mode == "知识库问答":
     if available_indexes:
-        rag_index = st.selectbox("选择问答使用的索引", available_indexes, key="rag_index_choice")
+        rag_index = st.selectbox("选择问答使用的知识库", available_indexes, key="rag_index_choice")
         st.caption("会将本次检索出的资料片段及来源、当前问题和此前对话发送给 DeepSeek；问题最多 200 字。")
     else:
-        st.info("请先在上方建立本地向量索引，再使用知识库问答。")
+        st.info("请先在上方上传资料并更新知识库，再使用知识库问答。")
 
 # 没有 Key 或知识库模式没有索引时，禁用输入框。
 question = st.chat_input(
@@ -192,12 +143,11 @@ question = st.chat_input(
     disabled=not api_key or (chat_mode == "知识库问答" and not rag_index),
 )
 
+# 五、提交问题后保存历史；知识库模式先检索，再调用 DeepSeek 并保存回答。
 # 用户提交问题后，先保存和显示问题，再请求模型回答。
 # 如果 question 为空，跳过这一整段，不发送请求。
 if question:
     st.session_state.pop("chat_notice", None)
-    # 新问题开始时清除上一次过程，检索失败时也不会显示旧结果。
-    st.session_state.pop("rag_trace", None)
 
     created_new_file = False
     # 把问题追加到当前会话：role 标记消息来自用户，content 保存问题文字。
@@ -231,12 +181,6 @@ if question:
                 api_messages, references = prepare_rag_messages(
                     question, st.session_state["conversation"], rag_index
                 )
-            # 保存本次实际准备的内容，而不是根据之后的界面选择重新计算。
-            st.session_state["rag_trace"] = {
-                "question": question, "index_filename": rag_index,
-                "references": deepcopy(references), "messages": deepcopy(api_messages),
-                "request_status": "已准备消息，尚未调用模型接口",
-            }
         else:
             # 模型接口只接受角色和内容，不发送本地保存的用量等字段。
             api_messages = [
@@ -259,28 +203,56 @@ if question:
         ) as client:
             # 等待模型回答时，在网页上显示提示。
             with st.spinner("DeepSeek 正在回答…"):
-                if chat_mode == "知识库问答":
-                    st.session_state["rag_trace"]["request_status"] = "正在尝试调用模型接口"
                 # 发送对话记录并等待模型返回结果，保存到 response。
                 response = client.chat.completions.create(
-                    # 选择 DeepSeek 的 deepseek-flash 模型。
+                    # model 和 messages 是必填参数，其余是 DeepSeek 的可选参数。
                     model="deepseek-flash",
-                    # 发送整理后的消息，使模型能参考之前的对话。
                     messages=api_messages,
-                    # 限制本次回答最多生成 512 个 token。
-                    max_tokens=512,
-                    # 控制非思考模式下的随机程度；思考模式开启时此参数不生效。
+
+                    # 思考内容和最终回答共用输出额度；知识库问答使用较高上限。
+                    max_tokens=RAG_MAX_TOKENS if chat_mode == "知识库问答" else CHAT_MAX_TOKENS,
+                    # 温度范围 0～2；思考模式下不生效。
                     temperature=0.1,
-                    # 通过 extra_body 传入 DeepSeek 参数，兼容当前较旧的 OpenAI SDK。
+
+                    # NOT_GIVEN 表示 SDK 不发送此参数；需要时可替换为有效值。
+                    # 核采样，范围大于 0 且不超过 1；实际效果取决于模型和模式。
+                    top_p=NOT_GIVEN,
+                    # 输出格式：例如 {"type": "text"} 或 {"type": "json_object"}。
+                    # JSON 模式还需要在消息中要求输出 JSON。
+                    response_format=NOT_GIVEN,
+                    # 停止序列：一个字符串或最多 16 个字符串；遇到时停止生成。
+                    stop=NOT_GIVEN,
+
+                    # 是否返回流式数据。当前后续代码按非流式对象处理，不要直接设为 True。
+                    stream=False,
+                    # 流式选项例如 {"include_usage": True}；仅能与 stream=True 配合，
+                    # 启用流式还需要改写响应读取和 Token 用量处理。
+                    stream_options=NOT_GIVEN,
+
+                    # 工具定义和调用方式。启用前需实现工具执行、结果回传及思考内容处理。
+                    tools=NOT_GIVEN,
+                    # 可选 none、auto、required 或指定函数；思考模式不支持后两种强制调用。
+                    tool_choice=NOT_GIVEN,
+
+                    # 是否返回输出 token 的对数概率；当前网页不展示这些数据。
+                    logprobs=NOT_GIVEN,
+                    # 每个位置返回的候选 token 数量 0～20；设置时必须同时 logprobs=True。
+                    top_logprobs=NOT_GIVEN,
+
+                    # 这两项在 DeepSeek 当前接口中已弃用，发送也不生效。
+                    frequency_penalty=NOT_GIVEN,
+                    presence_penalty=NOT_GIVEN,
+
+                    # DeepSeek 专有字段通过 extra_body 传入请求体。
                     extra_body={
-                        # 保持思考模式开启；可改为 disabled 关闭。
+                        # 思考模式开关：enabled 或 disabled；显式设置时决定开关。
                         "thinking": {"type": "enabled"},
-                        # 思考强度可设置为 low、high 或 max；当前使用 max。
+                        # 可选 none、low、high、max；当前 max。
                         "reasoning_effort": "max",
+                        # 可选自定义用户标识，例如 "user_001"；不要填写私人信息。
+                        "user_id": NOT_GIVEN,
                     },
                 )
-                if chat_mode == "知识库问答":
-                    st.session_state["rag_trace"]["request_status"] = "已收到模型响应"
 
         # response 是本次非流式 Chat Completions 返回的对象，而不是请求参数。
         # 顶层字段：
@@ -325,15 +297,18 @@ if question:
         # 从第一条候选回答的 message 中取出最终回答文本。
 
         answer = response.choices[0].message.content
+        finish_reason = response.choices[0].finish_reason
 
         # 读取 API 返回的模型名称；如果没有返回，则记为 None。
         response_model = getattr(response, "model", None)
         if not isinstance(response_model, str):
             response_model = None
 
-        # 如果模型没有返回文本，主动抛出异常，交给下方 except 处理。
+        # 未返回正文时，根据结束原因给出明确提示，不把它误报为网络或 Key 错误。
         if not answer:
-            raise ValueError("模型没有返回文本")
+            if finish_reason == "length":
+                raise EmptyModelAnswerError("模型达到输出长度或上下文限制，尚未生成最终回答。请缩短问题或对话历史后重试，或调整 max_tokens。")
+            raise EmptyModelAnswerError("模型未返回最终回答，请重试或检查模型配置。")
 
         # 将接口返回的用量对象转换为可以写入 JSON 的字典。
         usage = getattr(response, "usage", None)
@@ -350,7 +325,7 @@ if question:
         # 将回答、模型名称和用量放在同一条助手消息中，方便以后一起读取。
         answer_message = {
             "role": "assistant", "content": answer,
-            "model": response_model, "usage": usage_data,
+            "model": response_model, "usage": usage_data, "finish_reason": finish_reason,
         }
 
         # 保存实际提供给模型的资料片段，方便以后查看当时的依据。
@@ -375,11 +350,14 @@ if question:
         st.session_state["chat_notice"] = ("error", notice)
         st.error(notice)
 
+    # 只展示程序自行生成的空回答提示，不暴露请求或配置的原始内容。
+    except EmptyModelAnswerError as error:
+        notice = str(error)
+        st.session_state["chat_notice"] = ("error", notice)
+        st.error(notice)
+
     # 捕获请求或处理回答时发生的异常，避免网页因异常中断。
     except Exception as error:
-        trace = st.session_state.get("rag_trace")
-        if trace and trace["request_status"] == "正在尝试调用模型接口":
-            trace["request_status"] = "模型请求未完成，无法确定服务端是否收到"
         # 只显示异常类型，不展示原始错误详情；请求失败时用户问题仍保留在会话中。
         notice = f"本次回答未完成（{type(error).__name__}），请检查配置、网络和账户额度后重试。"
         st.session_state["chat_notice"] = ("error", notice)
@@ -389,5 +367,3 @@ if question:
     if created_new_file:
         st.rerun()
 
-# 显示最近一次知识库问答的过程；普通重跑不会重新发送请求。
-render_rag_trace()

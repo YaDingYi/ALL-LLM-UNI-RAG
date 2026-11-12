@@ -1,0 +1,43 @@
+[
+  {
+    "role": "user",
+    "content": "什么是RRAM"
+  },
+  {
+    "role": "assistant",
+    "content": "根据提供的资料，无法给出 RRAM 的完整定义；资料只显示了它在这项工作中的用途和形态：\n\n- RRAM 被用来构造 **RRAM-CAM**，也就是基于 RRAM 的内容可寻址存储器；该结构通过内存内并行搜索减少数据搬运，从而实现高能效、低延迟的文本压缩[1][2]。\n- 实验芯片是 **1Mb、40nm 的 1T1R（1 个晶体管 + 1 个 RRAM）RRAM 芯片**[2][3]。\n- 因此，在资料范围内，可以把 RRAM 理解为该芯片中用于实现 CAM/存内搜索的一种存储器件；但资料没有说明它的全称、材料机制或详细工作原理。\n\n补充说明：在通用术语中，RRAM 通常指 **Resistive Random Access Memory（阻变随机存取存储器）**，但这一全称和定义并未由上述参考资料给出。",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 462,
+      "completion_tokens": 1193,
+      "total_tokens": 1655
+    },
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "id": "chunk-002636",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 2,
+        "number": 42,
+        "text": "rgy eﬃciency and a 13.8× reduction in search latency\ncompared with a CPU implementation.\nII. DESIGN OF RRAM-CAM-BASED TEXT COMPRESSION\nSYSTEM\nA. System Workﬂow and RRAM CAM Architecture\nThe workﬂow of the proposed RRAM-CAM-based text\ncompression system is shown in Fig. 3(a). A pre-built\nThis article",
+        "score": 0.5358647108078003
+      },
+      {
+        "id": "chunk-002600",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 1,
+        "number": 6,
+        "text": "rge dictionaries for improved compression ratio, while\nCAM-based in-memory parallel search reduces data movement\nand enables energy-eﬃcient and low-latency text compression.\nThe proposed system is validated through a demonstration\nusing a fabricated 1Mb 40nm 1-transistor–1-RRAM (1T1R) chip.\nEvaluati",
+        "score": 0.5349336862564087
+      },
+      {
+        "id": "chunk-002639",
+        "source": "上传/An_Energy-Efficient_and_Low-Latency_RRAM-CAM-Based_In-Memory_Text_Compression_System.pdf",
+        "page": 3,
+        "number": 45,
+        "text": "WU et al.: ENERGY-EFFICIENT AND LOW-LATENCY RRAM-CAM-BASED IN-MEMORY TEXT COMPRESSION SYSTEM\n3\nFig. 4. Photo of test platform and the fabricated 1Mb RRAM chip.\ndictionary is ﬁrst generated oﬄine using byte pair encoding\n(BPE), which identiﬁes frequently recurring byte sequences\nand selects them as d",
+        "score": 0.5220311284065247
+      }
+    ]
+  }
+]
