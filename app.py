@@ -1,4 +1,4 @@
-'''Streamlit 入口：上传并更新知识库、管理对话历史、调用 DeepSeek 回答。
+'''Streamlit 入口：自动更新知识库、管理对话历史、调用 DeepSeek 回答。
 
 页面每次交互会重新执行本文件；对话和选择状态由 st.session_state 保存。
 知识库构建、检索和历史文件读写分别委托给对应模块，完整流程见 README。
@@ -15,7 +15,8 @@ from history import create_history, list_history_files, load_history, save_histo
 from chat_ui import show_message
 from chroma_index import list_indexes
 from rag_demo import RetrievalError, prepare_rag_messages
-from upload_ui import render_upload_ui
+from upload_ui import render_update_status
+from web_search import WebSearchError, search_web
 
 # 对可重试的请求错误，除首次请求外最多再尝试 5 次。
 MAX_RETRIES = 5
@@ -27,21 +28,21 @@ RAG_MAX_TOKENS = 8192
 class EmptyModelAnswerError(Exception):
     '''模型没有返回可显示的最终回答。'''
 
-# 一、设置网页并显示上传与知识库更新入口。
+# 一、设置网页并显示知识库自动更新状态。
 # 设置浏览器标签页和页面布局。
-st.set_page_config(page_title="知识库助手 · 学习版", page_icon="📚", layout="wide")
+# st.set_page_config(page_title="知识库助手 · 学习版", page_icon="📚", layout="wide")
+st.set_page_config(page_title="伊亚玎的Agent助手", page_icon="📚", layout="wide")
 
 # 显示网页标题与说明。
-st.title("📚 我的知识库助手")
-st.caption("上传资料，选择对话模式，开始提问。")
+st.title("📚 伊亚玎的Agent助手")
+st.caption("功能：本地知识库+联网搜索。")
 
-# 在页面顶部提供上传入口；具体处理位于 upload_ui.py。
-render_upload_ui()
+# 在首次连接时自动更新知识库，并在页面顶部显示状态。
+render_update_status()
 
 # 二、读取 API Key，并初始化或切换本地对话历史。
 # 读取当前项目目录中的配置文件；Key 不显示在页面上。
-config_path = Pat
-h(__file__).resolve().parent / ".env.local"
+config_path = Path(__file__).resolve().parent / ".env.local"
 config = dotenv_values(config_path)
 api_key = (config.get("DEEPSEEK_API_KEY") or "").strip()
 
@@ -96,8 +97,8 @@ if selected_file != st.session_state["active_history_file"]:
     # 清除上一段对话的提示；如果没有 chat_notice，默认返回 None，不会报错。
     st.session_state.pop("chat_notice", None)
 
-if not st.session_state["active_history_file"]:
-    st.caption("当前是新对话；提交第一个问题后会创建历史文件。")
+# if not st.session_state["active_history_file"]:
+#     st.caption("当前是新对话；提交第一个问题后会创建历史文件。")
 
 if "chat_notice" in st.session_state:
     level, message = st.session_state["chat_notice"]
@@ -116,7 +117,7 @@ if not api_key:
 for message in st.session_state["conversation"]:
     show_message(message)
 
-# 四、选择普通对话或知识库问答，以及本次要使用的知识库。
+# 四、选择普通对话、本地知识库问答或本地加互联网联合检索。
 # 查找已经完成的 Chroma 集合；数据库不可用时，普通对话仍可使用。
 try:
     available_indexes = list_indexes()
@@ -124,23 +125,29 @@ except Exception:
     available_indexes = []
     st.warning("无法读取本地 Chroma 知识库，请检查依赖和目录权限。")
 
-# 已有索引时默认进入知识库问答，也可以切换回普通对话。
+# 已有索引时默认使用联合检索，也可以选择原来的其他模式。
 chat_mode = st.radio(
-    "对话模式", ["普通对话", "知识库问答"],
-    index=1 if available_indexes else 0, horizontal=True, key="chat_mode_choice",
+    "对话模式", ["普通对话", "知识库问答", "本地+互联网联合检索"],
+    index=2 if available_indexes else 0, horizontal=True, key="chat_mode_choice",
 )
 rag_index = None
-if chat_mode == "知识库问答":
+uses_knowledge = chat_mode in ("知识库问答", "本地+互联网联合检索")
+uses_web = chat_mode == "本地+互联网联合检索"
+if uses_knowledge:
     if available_indexes:
-        rag_index = st.selectbox("选择问答使用的知识库", available_indexes, key="rag_index_choice")
-        st.caption("会将本次检索出的资料片段及来源、当前问题和此前对话发送给 DeepSeek；问题最多 200 字。")
+        # 集合按创建时间从新到旧排列；即使清理失败留下旧集合，也只使用最新集合。
+        rag_index = available_indexes[0]
+        st.caption("会将本次检索出的资料片段及来源、当前问题和此前对话发送给 DeepSeek。")
     else:
-        st.info("请先在上方上传资料并更新知识库，再使用知识库问答。")
+        st.info("请将资料放入项目的“资料”文件夹，重启服务并打开网页后自动更新知识库。")
+if uses_web:
+    # 搜索接口只接收当前问题；历史和本地片段只在生成回答时发送。
+    st.caption("联合检索会将当前问题发送给 DeepSeek 搜索服务（最多 128 字），并将本地片段、网页摘要及对话历史发送给 DeepSeek 生成回答。搜索成功且有结果时单独按次收费；回答按 Token 收费。")
 
 # 没有 Key 或知识库模式没有索引时，禁用输入框。
 question = st.chat_input(
-    "请输入你的问题", max_chars=200 if chat_mode == "知识库问答" else None,
-    disabled=not api_key or (chat_mode == "知识库问答" and not rag_index),
+    "请输入你的问题", max_chars=128 if uses_web else (200 if uses_knowledge else None),
+    disabled=not api_key or (uses_knowledge and not rag_index),
 )
 
 # 五、提交问题后保存历史；知识库模式先检索，再调用 DeepSeek 并保存回答。
@@ -174,12 +181,14 @@ if question:
 
     # 尝试创建客户端并请求回答；发生错误时由下面的 except 处理。
     try:
-        # 知识库模式先查找资料；普通模式只整理原有对话。
+        # 联合模式分别搜索本地与互联网，再把来源一起组织给模型。
         references = None
-        if chat_mode == "知识库问答":
-            with st.spinner("正在本地索引中查找资料…"):
+        if uses_knowledge:
+            # 传入搜索函数：本地检索成功后才执行，减少不必要的搜索费用。
+            web_searcher = (lambda query: search_web(query, api_key, count=3)) if uses_web else None
+            with st.spinner("正在检索本地资料和所选互联网来源…"):
                 api_messages, references = prepare_rag_messages(
-                    question, st.session_state["conversation"], rag_index
+                    question, st.session_state["conversation"], rag_index, web_searcher=web_searcher
                 )
         else:
             # 模型接口只接受角色和内容，不发送本地保存的用量等字段。
@@ -210,7 +219,7 @@ if question:
                     messages=api_messages,
 
                     # 思考内容和最终回答共用输出额度；知识库问答使用较高上限。
-                    max_tokens=RAG_MAX_TOKENS if chat_mode == "知识库问答" else CHAT_MAX_TOKENS,
+                    max_tokens=RAG_MAX_TOKENS if uses_knowledge else CHAT_MAX_TOKENS,
                     # 温度范围 0～2；思考模式下不生效。
                     temperature=0.1,
 
@@ -345,7 +354,7 @@ if question:
         show_message(answer_message)
 
     # 检索失败时不发送模型请求，在网页上显示本地错误提示。
-    except RetrievalError as error:
+    except (RetrievalError, WebSearchError) as error:
         notice = str(error)
         st.session_state["chat_notice"] = ("error", notice)
         st.error(notice)

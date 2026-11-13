@@ -32,6 +32,8 @@
 
 每次重新执行都会生成新的文件名，不覆盖这一轮结果。重新运行后，耗时和报告时间自然会变化；应以对应那一轮的报告为准。
 
+项目现在只保留最新的已完成知识库。上表记录的是当时的历史集合名称，该集合可能已被清理；历史报告仍可查看，但无法保证在原集合上再次运行。重新评估时使用最新集合，并先检查题库资料版本。
+
 ## 2. 为什么采用“标注原文证据覆盖”
 
 第一阶段的gold_evidence是几段已核对的原文摘录，并没有穷尽标注知识库中所有语义相关片段。因此，现阶段不能声称自己已经拥有传统片段级Recall@k需要的完整相关性标签。
@@ -262,11 +264,11 @@ sum(covered_evidence) / len(evidences)
 | Python解释器 | `/Users/yadingyi/miniconda3/envs/application-llm-universe/bin/python3.13` |
 | 脚本路径 | `/Users/yadingyi/Desktop/AI-algorithm/application-llm-universe/evaluation/run_retrieval.py` |
 | 工作目录 | `/Users/yadingyi/Desktop/AI-algorithm/application-llm-universe` |
-| 脚本参数 | `--collection kb-20261104-132219-889c6bb3b237468db70519ad2b4a301a --top-k 3` |
+| 脚本参数 | `--top-k 3` |
 
 这是普通Python脚本，不使用 `streamlit run`。也不需要API Key；它不会读取.env.local。控制台会显示集合规模、逐题状态和最终报告的绝对路径。
 
-如果省略 `--collection`，脚本会选择最新可用集合；这不保证等于浏览器当时手动选中的集合。为了复查本轮结果，建议使用上面的固定集合参数。未来新增知识库后，要先确认是否打算更换评估集合。
+省略 `--collection` 时脚本会选择最新可用集合。重新运行会评估当前集合，不能将它视为对已经删除的历史集合的复现。
 
 ## 10. 在终端中运行
 
@@ -275,7 +277,6 @@ sum(covered_evidence) / len(evidences)
 ```bash
 /Users/yadingyi/miniconda3/envs/application-llm-universe/bin/python3.13 \
   /Users/yadingyi/Desktop/AI-algorithm/application-llm-universe/evaluation/run_retrieval.py \
-  --collection kb-20261104-132219-889c6bb3b237468db70519ad2b4a301a \
   --top-k 3
 ```
 

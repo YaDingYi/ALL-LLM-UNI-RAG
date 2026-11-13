@@ -3,6 +3,7 @@ streamlit==1.66.1
 python-dotenv==1.2.4
 openai==1.52.1
 httpx==0.28.1
+filelock>=3.12,<5
 
 # 文档读取、本地嵌入模型和 Chroma 持久化知识库。
 -r requirements-documents.txt

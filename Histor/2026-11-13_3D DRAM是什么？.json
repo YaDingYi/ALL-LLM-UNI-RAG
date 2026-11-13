@@ -1,0 +1,70 @@
+[
+  {
+    "role": "user",
+    "content": "3D DRAM是什么？"
+  },
+  {
+    "role": "assistant",
+    "content": "3D DRAM 是指**通过垂直堆叠存储单元或存储层，突破传统平面 DRAM 微缩限制，以提升存储密度和能效的下一代 DRAM 架构技术**[5]。有报道将其概括为“沿垂直方向存储比特”，思路类似 3D NAND[6]。\n\n具体可从几个方面理解：\n\n- **为什么要发展 3D DRAM**：传统二维 DRAM 架构复杂，在 10 nm 以下面临微缩限制[3]；3D DRAM 被视为实现进一步 scaled 3D DRAM、并推动下一代 AI 计算和能效型存储系统的重要方向[2][3]。\n- **它不是单一实现方式**：从资料看，至少包括“原生单片 3D DRAM”和“封装堆叠”等不同路线。翱捷科技曾说明其方案是封装堆叠路线，没有原生单片 3D DRAM，而单片 3D DRAM 属于存储厂的前沿研发方向[5]。\n- **封装堆叠路线**：例如 3DS 技术用硅通孔（TSV）垂直连接 DRAM 芯片；它与 HBM 一样使用 TSV，但 HBM 侧重传输速度，3DS 更侧重在保持现有 DRAM 接口的同时扩展容量[6]。\n- **近存/混合键合路线**：有方案采用晶圆级混合键合，把 DRAM 存储层和 AI 逻辑层垂直集成，不依赖传统 TSV 与 2.5D 中介层，面向大模型推理中的 KV 缓存需求，与 HBM 形成差异化定位[4]。\n\n挑战方面，AOS 材料尚未用于大规模量产，建立包含污染控制协议的制造线仍是主要难题[1]；整体上该路线仍处于流片、验证到早期量产阶段，需要攻克晶圆混合键合对准、层间互连可靠性、堆叠散热和良率管控等难点[4]。\n\n需要注意：上述行业信息主要来自 2026 年 10—11 月的搜索摘要[4][5][6]，并非完整原文；且不同厂商口中的“3D DRAM”可能分别指封装堆叠或原生单片路线，讨论时应先确认具体定义[5]。",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 2270,
+      "completion_tokens": 1456,
+      "total_tokens": 3726
+    },
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "id": "chunk-c245dec635d48f6f25ab77b7790a344d8074ca673136aa13cd8df018a00a8633",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 13,
+        "number": 255,
+        "text": "3D DRAM130,131. However, \nseveral challenges remain. Most notably, AOS materials have not yet \nbeen adopted for mass production, so establishing manufacturing \nlines, including contamination-control protocols, remains a major chal-\nlenge. Second, an AOS transistor operates in an accumulation-depleti",
+        "score": 0.6430887579917908
+      },
+      {
+        "id": "chunk-6c82dd3d35f2d35c5d1aaee8cd21a2d88928b75f7839855ac6fc54675c1439b2",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 1,
+        "number": 6,
+        "text": " realization of scaled 3D DRAM. Although many \nintegration hurdles remain, 3D DRAM is poised to become a crucial \nenabler for next-generation artificial intelligence computing.\n1Department of Materials Science and Engineering and Inter-university Semiconductor Research Center, Seoul \nNational Univer",
+        "score": 0.6286916136741638
+      },
+      {
+        "id": "chunk-f57fdbfdc7ad3fdac0188e62a67e53e59ab5fab8f5a6469f29c358ed2a438a57",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 2,
+        "number": 15,
+        "text": "e in 3D DRAM cells. Finally, 3D DRAM \ntechnologies have the potential to drive the artificial intelligence (AI) \ncomputing era by enabling energy-efficient memory systems.\nTwo-dimensional DRAM architectures\nTwo-dimensional DRAM has a complex architecture that imposes \nscaling limitations below 10 nm",
+        "score": 0.6243017315864563
+      },
+      {
+        "type": "web",
+        "source": "内存墙难题下，资本盯上3D DRAM，信号很明显-集邦咨询 | 集邦TrendForce - 提供内存闪存、LED照明、显示器面板、新能源太阳能光伏产业的市场报告、价格趋势",
+        "url": "https://www.trendforce.cn/industry-news/semiconductors/20261110-9157.html",
+        "text": "# 内存墙难题下，资本盯上3D DRAM，信号很明显 2026/11/10 admin 大模型推理需求持续向端侧和边缘下沉，存储带宽逐渐成为制约算力释放的瓶颈，围绕3D DRAM的存算、近存计算架构在2026年频频受到资本关注。 从年初的东方算芯，到8月的谦合益邦、10月的算苗科技和亿铸科技，年内已有多家厂商接连拿到十亿乃至数十亿级别的大额融资。 3D DRAM究竟是什么，又为何在这个时间点被资本密集押注？ ### 内存墙难题下，3D堆叠成为差异化解法 要理解资本的信号为什么在今年集中出现，需要先看清内存墙是怎么形成的。 过去几十年，处理器算力的提升速度一直快于内存带宽和访问延迟的改善速度，两边差距不断拉大。到了大模型推理阶段，问题被进一步放大：推理过程需要反复读取权重参数和KV缓存，数据吞吐量大，一旦带宽跟不上，算力单元只能空转等待数据。业界把这种算力被存储拖住的现象称为内存墙。 面对内存墙挑战，业界现有的解决思路大致分为两条。 一条思路是提升存储本身的带宽能力，将多片DRAM裸片垂直堆叠，依靠高密度互连结构缩短片间走线距离、提升并行访问通道。 HBM就是这条路线商业化最成熟的方案，依靠TSV硅通孔实现多层DRAM堆叠，搭配2.5D硅中介层和GPU协同，目前已经广泛配套在AI训练GPU上，有效拉高访存带宽。 但HBM方案也存在明显的结构性短板：全球供给相对集中在海外存储三巨头手中，工艺门槛、良率约束严苛，单颗容量上限有限，单位带宽成本居高不下，并不适合海量KV缓存、高并发推理集群大规模落地。 在此基础上延伸出来的3D DRAM近存方案，采用晶圆级混合键合，直接把DRAM存储层和AI逻辑层垂直集成，不再依赖传统TSV与2.5D中介层，在有限的芯片面积内同时拉高带宽与存储容量，专门适配大模型推理持续膨胀的KV缓存需求，和HBM形成差异化定位。 另一条思路是改变计算的位置，让计算靠近存储，也就是近存计算、存算一体路线。 近存计算是把简单的运算单元放置在存储阵列周边，在数据流出存储之前完成部分计算，减少数据向外搬运；存算一体则更进一步，直接在存储阵列内部完成乘加运算，从根源上削减数据搬运量。 不过这两条路线并不是完全割裂，不少国内创业方案正是将3D DRAM堆叠和近存计算IP做融合设计，在带宽、容量、功耗之间做权衡取舍。 这条路线目前仍处在流片、验证到早期量产的阶段，工艺上需要攻克晶圆混合键合对准、层间互连可靠性、堆叠结构散热、堆叠良率管控等一系列难点。端侧、边缘场景还额外有功耗、封装体积、成本的硬性约束，这也造就了各家厂商面向云端、边缘、端侧不同场景的路线分化。 国内在3D DRAM、混合键合与近存计算方向的布局循序渐进，从学术预研、工艺探索走向产业化验证。 2021年：国内研究团队先后产出近存计算、4F2DRAM架构论文，正式开启3D堆叠存算方向系统性学术研究",
+        "page": null,
+        "date": "2026-11-09T16:00:00+00:00",
+        "retrieved_at": "2026-11-13T16:32:27.660017+08:00"
+      },
+      {
+        "type": "web",
+        "source": "翱捷科技11月11日回应3D DRAM话题：采用封装堆叠路线，无原生单片方案",
+        "url": "https://stock.stockstar.com/RB2026111200005885.shtml",
+        "text": "# 翱捷科技11月11日回应3D DRAM话题：采用封装堆叠路线，无原生单片方案 来源：证券之星APP 2026-11-12 07:03:39 ... 翱捷科技回应，公司的3D DRAM方案是封装堆叠路线，目前没有原生单片3D DRAM，单片3D DRAM属于存储厂前沿技术研发方向，不属于公司当前业务范畴。 ... 题材释义：3D DRAM指通过垂直堆叠存储单元突破传统平面微缩限制、提升存储密度与能效的下一代动态随机存取存储器架构技术。",
+        "page": null,
+        "date": "2026-11-11T16:00:00+00:00",
+        "retrieved_at": "2026-11-13T16:32:27.660017+08:00"
+      },
+      {
+        "type": "web",
+        "source": "英伟达入局3D DRAM？行业变革在即 3D DRAM技术前景深度解析 - 英伟达也要入局3D DRAM？",
+        "url": "https://eu.36kr.com/zh/p/4034962668082055#1",
+        "text": "# 英伟达也要入局3D DRAM？ 半导体行业观察2026-10-21 10:18 3D DRAM似乎正在成为必经之路。 据韩媒报道，已被英伟达实际收购的人工智能半导体公司Groq正计划将一种三维堆叠式DRAM封装技术应用于下一代芯片。此举被解读为Groq试图通过摆脱目前以SRAM为中心的芯片设计（SRAM速度快但容量小）来大幅提升芯片容量。 Grok采用的方法被称为3DS（3D堆叠式存储器）。3DS是一种高容量封装，它使用硅通孔（TSV）垂直连接DRAM芯片。虽然它与高带宽存储器（HBM）类似，都使用TSV，但与专注于数据传输速度的HBM不同，3DS专注于在保持现有DRAM接口的同时扩展容量。 一位半导体行业内部人士表示，“Groq计划在其下一代芯片中引入3D封装技术”，并补充道，“这项技术涉及堆叠DRAM而非现有的SRAM。”业内人士 将Groq此举解读为旨在大幅提升芯片容量。SRAM 速度快但容量有限，而DRAM速度相对较慢，但更适合实现大容量芯片。 从这个消息可以看到，3D DRAM似乎正在成为必经之路。 ## SRAM的容量增长，已经跟不上模型扩张 作为另一个赛道的英伟达的竞争者，d-Matrix的技术路线转——从SRAM计算到3D堆叠DRAM的演进——很好地解析了Groq这个转变的原因。因为在此前，Groq的解决方案用的也是SRAM 在此前接受Tae Kim采访的时候，d-Matrix公司CEO Sid Sheth表示，公司最初推出的Corsair采用SRAM作为计算架构的一部分。按照Sheth的解释，d-Matrix在选择存储技术时，主要考虑了两个因素：一是存储器必须支持灵活编程，能够适应数据中心不断变化的工作负载；二是计算结果需要具备数字电路所要求的可预测性和准确性。基于这些考虑，公司选择了SRAM。 SRAM的优势在于能够支持高速、低延迟的数据访问，因此适合对交互速度要求较高的AI推理任务。但随着模型规模和上下文长度不断增长，SRAM的容量扩展能力开始成为限制。 Sheth指出，SRAM与逻辑芯片采用相同的逻辑工艺，其容量增长也受到晶体管缩放速度放缓的影响。他在采访中给出的对比是，SRAM容量每两年只能增加约10%至20%，而模型规模可能每六至九个月就翻一倍。 这意味着，单纯依靠SRAM，越来越难以同时满足模型对内存容量和带宽的需求。 问题的关键并不只是SRAM成本高，而是它的容量增长速度已经难以匹配AI模型的扩张速度。继续沿用原有架构，即使计算能力不断提升，也可能因为内存资源不足而无法充分发挥性能。 因此，d-Matrix需要寻找一种新的存储器扩展方式：既保留SRAM在高速访问方面的优势，又引入更大容量的存储资源。这就引至他们转向3D DRAM。 所谓3D DRAM ，指的是沿垂直方向存储比特的架构，类似于 3D NAND。 从设计上看，",
+        "page": null,
+        "date": "2026-10-20T16:00:00+00:00",
+        "retrieved_at": "2026-11-13T16:32:27.660017+08:00"
+      }
+    ]
+  }
+]

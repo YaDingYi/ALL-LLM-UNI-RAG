@@ -48,8 +48,10 @@ def read_word(path):
     return "\n".join(lines)
 
 
-def read_documents():
-    #读取支持的文件，返回成功读取的资料和逐文件提示。
+def read_documents(sources=None):
+    '''读取全部资料或指定来源；增量更新只解析新增、修改的文件。'''
+    # None表示读取全部文件；集合则限制本次实际解析的来源。
+    selected_sources = None if sources is None else set(sources)
     documents = []
     warnings = []
 
@@ -60,6 +62,10 @@ def read_documents():
 
         source = path.relative_to(DOCUMENTS_DIR).as_posix()
         suffix = path.suffix.lower()
+
+        # 增量建库跳过未变化资料，避免重复打开和解析旧PDF、Word等文件。
+        if selected_sources is not None and source not in selected_sources and suffix != ".doc":
+            continue
 
         if suffix == ".doc":
             warnings.append({"source": source, "message": "旧版 .doc 暂不支持，请另存为 .docx。"})

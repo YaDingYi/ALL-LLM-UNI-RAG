@@ -1,10 +1,45 @@
-'''保存网页上传的资料，并根据全部本地资料生成新的索引快照。'''
+'''保存上传资料，按文件变化增量更新知识库并复用已有向量。'''
 
 import os
+from contextlib import contextmanager
 from pathlib import Path
+from threading import RLock
 
+import chroma_index
 import document_reader
-from chroma_index import create_index
+from filelock import FileLock
+from document_monitor import scan_documents
+from chroma_index import _get_ready_collection, cleanup_old_indexes, list_indexes
+from incremental_index import (
+    create_incremental_index, list_index_sources, match_legacy_sources, read_index_manifest,
+)
+
+# 同一进程中的多个网页会话不能同时构建，防止选择同一基线后互相覆盖状态。
+_UPDATE_LOCK = RLock()
+
+
+@contextmanager
+def knowledge_update_lock():
+    '''让同机多个服务进程串行更新与清理，避免新集合被其他更新误删。'''
+    with _UPDATE_LOCK:
+        # 锁文件独立于Chroma数据库，且跟随测试使用的临时数据库目录。
+        lock_path = chroma_index.CHROMA_DIR.parent / "knowledge-update.lock"
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with FileLock(str(lock_path)):
+            yield
+
+
+def _finish_update(result):
+    '''新集合发布或确认未变化后清理旧集合；清理失败单独报告。'''
+    try:
+        # 清理器会再次校验保留集合完整且是最新版本。
+        result["cleanup"] = cleanup_old_indexes(result["name"])
+    except Exception as error:
+        # 新知识库已成功，不能把清理失败误报为索引构建失败。
+        result["cleanup"] = {"kept": result["name"], "deleted": [],
+                             "failed": [{"name": "清理操作", "error_type": type(error).__name__}],
+                             "skipped_unready": [], "aborted": True}
+    return result
 
 
 class UploadError(Exception):
@@ -60,28 +95,104 @@ def save_uploaded_files(uploaded_files):
         raise
 
 
-def update_knowledge_index(required_sources=(), on_progress=None):
-    '''读取全部资料，生成新集合；返回集合名称、数量和读取提示。'''
-    # 重新读取全部资料，保证新索引不仅包含本次上传的文件。
-    documents, warnings = document_reader.read_documents()
-    sources = {document["source"] for document in documents}
-    missing = [source for source in required_sources if source not in sources]
-    if missing:
-        # 上传成功不代表文档有可提取的文字，失败时不发布不完整的新索引。
-        details = [f"{warning['source']}：{warning['message']}" for warning in warnings if warning["source"] in missing]
-        message = "以下上传资料没有读取到正文，未生成新索引：" + "、".join(missing)
-        if details:
-            message += "；" + "；".join(details)
-        raise UploadError(message)
+def update_knowledge_index(required_sources=(), on_progress=None, base_name=None, preserve_missing=False):
+    '''比较资料变化、复用未变向量，并在成功后清理旧的知识库。'''
+    with knowledge_update_lock():
+        # 只读取文件大小与修改时间，不读取未变文件的全部字节。
+        current = scan_documents(document_reader.DOCUMENTS_DIR)
+        indexes = list_indexes()
+        # 用户已选集合时使用该集合；尚未选择时才使用最新集合。
+        if base_name is None:
+            base_name = indexes[0] if indexes else None
+        elif base_name not in indexes:
+            raise UploadError("所选知识库已不可用，请重新选择后再更新。")
+        elif base_name != indexes[0]:
+            raise UploadError("只能基于最新知识库更新，请先选择最新集合。")
 
-    # 全部片段重新向量化，写入新的 Chroma 集合，不覆盖旧索引。
-    chunks = document_reader.split_documents(documents)
-    if not chunks:
-        raise UploadError("没有可建立索引的资料片段，请先准备含文字的资料。")
-    index = create_index(chunks, on_progress=on_progress)
-    return {
-        "name": index["name"],
-        "file_count": index["file_count"],
-        "chunk_count": index["chunk_count"],
-        "warnings": warnings,
-    }
+        # 索引清单独立于资料检查清单，只有成功入库后才建立。
+        manifest = read_index_manifest(base_name) if base_name else None
+        old_sources = list_index_sources(base_name) if base_name else set()
+        legacy = base_name is not None and manifest is None
+
+        if manifest is None:
+            # 旧集合没有文件版本信息；首次需读取和对比旧片段以确定可复用范围。
+            to_read = set(current)
+            reused_sources = set()
+        else:
+            # 清单记录的是每个文件成功入库时的大小和修改时间。
+            reused_sources = {source for source in old_sources
+                              if source in current and manifest.get(source) == current[source]
+                              and manifest[source]["mtime_ns"] != -1}
+            # 上传追加时保留旧库里已不在资料目录中的文件；重扫则同步删除。
+            if preserve_missing:
+                reused_sources |= old_sources - set(current)
+            to_read = set(current) - reused_sources
+
+        # 文件删除与文件无法解析是两种情况：前者移除，后者禁止发布不完整结果。
+        missing_on_disk = old_sources - set(current)
+        deleted_sources = set() if preserve_missing else missing_on_disk
+        documents, warnings = document_reader.read_documents(to_read)
+        readable = {document["source"] for document in documents}
+        missing_required = set(required_sources) - readable - reused_sources
+        # 每个应读取文件都必须成功；不能因为新文件无法解析就悄悄漏索引。
+        missing = sorted(missing_required | (to_read - readable))
+        if missing:
+            details = [f"{warning['source']}：{warning['message']}" for warning in warnings if warning["source"] in missing]
+            message = "以下资料无法读取正文，未更新知识库：" + "、".join(missing)
+            if details:
+                message += "；" + "；".join(details)
+            raise UploadError(message)
+
+        # 已索引文件如果被编辑为仅含空白，不能静默当成删除。
+        # 延续原建库规则：不把纯空白片段写入向量库。
+        chunks = [chunk for chunk in document_reader.split_documents(documents) if chunk["text"].strip()]
+        if legacy:
+            # 对旧集合逐文件比较原文与位置信息；只有完全匹配的来源才复用旧向量。
+            reused_sources = match_legacy_sources(base_name, chunks)
+            # 上传操作只追加，不因旧来源缺席而丢失原库中的片段。
+            if preserve_missing:
+                reused_sources |= missing_on_disk
+        new_chunks = [chunk for chunk in chunks if chunk["source"] not in reused_sources]
+        successful_sources = {chunk["source"] for chunk in chunks} | reused_sources
+        # 已缺失的旧来源用-1标记“无法核对”；以后重新出现时强制重新解析。
+        signatures = {
+            source: (current[source] if source in current else {"size": 0, "mtime_ns": -1})
+            for source in sorted(successful_sources)
+        }
+        if not signatures:
+            raise UploadError("没有可建立索引的资料片段，请先准备含文字的资料。")
+
+        def verify_unchanged():
+            # 构建期间发生添加、删除或修改时停止发布，避免索引与文件清单不一致。
+            if scan_documents(document_reader.DOCUMENTS_DIR) != current:
+                raise UploadError("资料在更新过程中发生变化，请重新更新知识库。")
+
+        # 有清单且确实没有任何有效变化时，直接复用原集合，不生成新集合。
+        if manifest is not None and not new_chunks and not deleted_sources and signatures == manifest:
+            verify_unchanged()
+            collection, count = _get_ready_collection(base_name)
+            return _finish_update({"name": base_name, "base_name": base_name, "file_count": len(signatures), "chunk_count": count,
+                    "warnings": warnings, "unchanged": True, "legacy": False,
+                    "reused_file_count": len(reused_sources), "new_file_count": 0,
+                    "modified_file_count": 0, "deleted_file_count": 0,
+                    "retained_missing_count": len(missing_on_disk) if preserve_missing else 0,
+                    "added_sources": [], "modified_sources": [], "deleted_sources": [],
+                    "retained_missing_sources": sorted(missing_on_disk) if preserve_missing else [],
+                    "reused_chunk_count": count, "new_chunk_count": 0})
+
+        # 新集合复制可复用向量，仅对新增和修改的文件片段调用本地嵌入模型。
+        index = create_incremental_index(
+            base_name, reused_sources, new_chunks, signatures,
+            on_progress=on_progress, validate_before_publish=verify_unchanged,
+            missing_sources=missing_on_disk if preserve_missing else (),
+        )
+        return _finish_update({**index, "base_name": base_name, "warnings": warnings, "unchanged": False, "legacy": legacy,
+                "reused_file_count": len(reused_sources),
+                "new_file_count": len(successful_sources - old_sources),
+                "modified_file_count": len((successful_sources & old_sources) - reused_sources),
+                "deleted_file_count": len(deleted_sources),
+                "retained_missing_count": len(missing_on_disk) if preserve_missing else 0,
+                "added_sources": sorted(successful_sources - old_sources),
+                "modified_sources": sorted((successful_sources & old_sources) - reused_sources),
+                "deleted_sources": sorted(deleted_sources),
+                "retained_missing_sources": sorted(missing_on_disk) if preserve_missing else []})

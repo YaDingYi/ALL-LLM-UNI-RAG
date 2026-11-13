@@ -1,0 +1,43 @@
+[
+  {
+    "role": "user",
+    "content": "帮我检索一下和DRAM相关的文章"
+  },
+  {
+    "role": "assistant",
+    "content": "去重后，提供的资料中可识别出 **2 篇 DRAM 相关文献**（[1] 与 [3] 实际为同一篇 PDF 的不同页）：\n\n1. **《3D DRAM architectures》/ 3D DRAM 架构综述**  \n   - 来源：*Nature Reviews Electrical Engineering*，DOI：10.1038/s44287-026-00347-x [1]。  \n   - 主题包括：传统 2D DRAM 的局限、3D DRAM 器件与工艺、3D 堆叠 DRAM 的挑战、3D DRAM 沟道材料候选方案及展望 [1]。  \n   - 同一文献第 9 页还讨论了 3D DRAM 中抑制 FBE、字线–位线耦合（WL–BL coupling）和电荷损失的问题，并涉及 VBL 3D DRAM 中的阶梯型字线接触结构 [3]。\n\n2. **《Vertically Stacked DRAM Technology for Scaling Evolution》/ 垂直堆叠 DRAM 技术**  \n   - 主题：垂直堆叠 DRAM（VS-DRAM）作为 10nm 节点之后延续 DRAM 代际的候选技术，采用类似 V-NAND 的单元堆叠方式；强调在高堆叠层数下实现可靠器件操作的重要性 [2]。  \n   - 摘要内容在资料中未完整给出，因此无法进一步概括其具体实验结论 [2]。\n\n**小结：**现有资料中的 DRAM 相关文章主要集中在 **3D DRAM 架构、垂直堆叠 DRAM（VS-DRAM）、堆叠结构中的字线接触与可靠性问题**。不过，这些资料只是 PDF 摘录，并非完整文献数据库，无法据此进行全面的文献检索，也无法提供作者、年份等完整书目信息。",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 409,
+      "completion_tokens": 1101,
+      "total_tokens": 1510
+    },
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "id": "chunk-000266",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 1,
+        "number": 9,
+        "text": "o-dimensional DRAM \narchitectures\nLimitations of conventional \n2D DRAM\nThree-dimensional DRAM \ndevices and processes\nChallenges in 3D-stacked \nDRAM\nChannel material candidates \nfor 3D DRAM\nOutlook\nnature reviews electrical engineering\nhttps://doi.org/10.1038/s44287-026-00347-x\nReview article\n Check ",
+        "score": 0.5692036151885986
+      },
+      {
+        "id": "chunk-001091",
+        "source": "3D DRAM/Vertically_Stacked_Dram_Technology_for_Scaling_Evolution.pdf",
+        "page": 1,
+        "number": 4,
+        "text": ".com \n \nAbstract \nVertical Stacked DRAM (VS-DRAM) has emerged as a \npromising candidate to extend DRAM generations beyond the \n10nm node, leveraging cell stacking similar to V-NAND. \nDemonstrating reliable device operation at higher tiers is \ncrucial to ensuring its competitiveness. For the first ti",
+        "score": 0.5637832880020142
+      },
+      {
+        "id": "chunk-000408",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 9,
+        "number": 151,
+        "text": "outes to suppress the FBE, WL–BL \ncoupling and charge loss in 3D DRAM, although additional integration \nand reliability challenges remain.\nStaircase WL contact\nStaircase WL contact is a stepped contact structure used to access \nindividual WLs in a vertically stacked memory array. In a VBL 3D DRAM, \n",
+        "score": 0.5569334030151367
+      }
+    ]
+  }
+]

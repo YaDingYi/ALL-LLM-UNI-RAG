@@ -1,0 +1,70 @@
+[
+  {
+    "role": "user",
+    "content": "floating body effect是什么？"
+  },
+  {
+    "role": "assistant",
+    "content": "**浮体效应（Floating Body Effect, FBE）**是指：晶体管**没有体接触**、体区被绝缘介质电隔离而处于“浮空”状态时，体电位无法被外部直接固定或快速调节；体区中积累或释放的多数载流子会改变体电位，进而调制晶体管的阈值电压和漏电流，由此产生的一组现象。[3][4][5]\n\n更具体地说：\n\n- **根本原因**是体区“浮空”、缺少体接触。隔离晶体管虽然减少了寄生电容等问题，但也意味着体电位不可控；多数载流子的过剩或不足会导致一类 FBE。[4]\n- 在 SOI 等结构中，晶体管体区相对衬底形成电容，电荷会在其中积累，体电位与载流子的产生、复合和充放电有关。[5][6]\n- FBE 不是单一故障，而是一族效应。常见表现包括**历史效应**（阈值电压依赖先前状态）、**回滞**、**扭结效应**、**晶体管闩锁**、非线性，以及寄生双极晶体管导通和关态泄漏增加。[4][5]\n- 在 DRAM 中，这类浮体充放电可能造成存储信息丢失或保持特性退化；在模拟器件中常表现为扭结效应。[5]\n- FBE 在部分耗尽 SOI 晶体管中尤其著名，因为中性体区可以收集和释放多数载流子，体电位变化会反映为阈值电压和漏电流变化。[4]\n\n在 **3D DRAM** 中，FBE 被列为集成挑战之一，与字线接触形成、晶圆键合、多层结构工艺复杂度等问题并列。[3] 具体而言，存储节点被充到高电位（如 Vdd）时，体区与存储节点之间形成强电场并诱发 **GIDL**；资料将 GIDL 与 FBE 直接联系起来，并指出通过结工程优化 GIDL 可以缓解 FBE、保障动态模式下的保持时间。FBE 在低位线电位下尤其明显；单元间分布较宽也说明工艺均匀性仍需改善。[1][2]\n\n需要注意：这里的“浮体”指**晶体管体区浮空**，不是指 DRAM 存储节点本身浮空；在 3D DRAM 情形中，是存储节点的高电位通过电场/GIDL 影响晶体管体区。[2][3] 另外，FBE 也并非完全有害：它可带来更高输出电流和更快开关，并被用于浮体存储器思路。[4]",
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 1936,
+      "completion_tokens": 3507,
+      "total_tokens": 5443
+    },
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "id": "chunk-d8ed7631ac0d39bb8753cc26670d0c958a1aad4d664b54832f26a94e8785df46",
+        "source": "3D DRAM/A_Three_Dimensional_DRAM_3D_DRAM_Technology_for_the_Next_Decades.pdf",
+        "page": 1,
+        "number": 47,
+        "text": " the floating body especially at low\nBL potential. Optimized GIDL by junction engineering in this\nwork could effectively mitigate FBE and ensure retention time\nin dynamic mode. The broad distribution indicates that process\nuniformity among cells needs to be improved to enhance\nretention characterist",
+        "score": 0.5797286629676819
+      },
+      {
+        "id": "chunk-09a5c62d1e0e4099ea016ddb19eb755c48291fa4c6cfb80bba0923fbaa9582dc",
+        "source": "3D DRAM/44287_2026_347_MOESM1_ESM.pdf",
+        "page": 11,
+        "number": 78,
+        "text": "Supplementary note 7 \n221 \nFloating body effect \n222 \n \n223 \nFigure S10| Floating body effect in 3D DRAM \n224 \nThe storage node is charged to a high potential (Vdd), creating a strong electric field between the body \n225 \nand storage node and inducing gate-induced drain leakage (GIDL). The generated",
+        "score": 0.5315482020378113
+      },
+      {
+        "id": "chunk-f4a7e8382366b8de2121a3beb4e9edfa64cf7098c412b9f5f796197408e7729e",
+        "source": "3D DRAM/44287-2026-347-x.pdf",
+        "page": 8,
+        "number": 131,
+        "text": "and integration challenges. These include the FBE, complex WL contact \nformation, wafer bonding and increasing process complexity in \nmultilayer structures.\nFloating-body and pass-gate effects\nThe FBE arises in transistors without body contact, where the body is \nelectrically isolated from the subst",
+        "score": 0.5166220664978027
+      },
+      {
+        "type": "web",
+        "source": "Floating-body effects - Skip to main contentSkip to article",
+        "url": "https://www.sciencedirect.com/science/chapter/monograph/abs/pii/B9780128196434000094#1",
+        "text": "The floating-body effects (FBEs) are historical mechanisms. The beautiful idea of isolating the transistor by a dielectric substrate implied acceptance of an uncontrollable body potential. The absence of a body contact precludes the manipulation of the majority carrier population and the instant adjustment of their charge needed to reach the steady state. The deficit or excess of majority carriers gives rise to a family of FBEs. FBEs are feared as being harmful and causing trouble in circuit performance such as nonlinearities, hysteresis, transistor latch, and history effects. The positive side is contemplated from a narrower angle: a higher output current for faster switching and the opportunity to conceive floating-body memories. FBEs are notorious in partially depleted SOI transistors where the neutral region of the body can collect and release majority carriers. The subsequent change in potential is mirrored by variations in threshold voltage and drain current. Since the very early discovery of the kink effect, followed by hysteresis and latch, the family of FBEs has expanded. The parasitic bipolar effect was noted as soon as the channel length became short enough. Progress in ",
+        "page": null,
+        "date": null,
+        "retrieved_at": "2026-11-13T16:22:35.289052+08:00"
+      },
+      {
+        "type": "web",
+        "source": "[科普中国]-浮体效应 - 图文",
+        "url": "https://cloud.kepuchina.cn/newSearch/imgText?from=1&id=6969034801746804736&is_self=2#1",
+        "text": "## [科普中国]-浮体效应 图文简介： 浮体效应（Floating body effect)是把硅放到绝缘体上做成的晶体管，它的体势及偏压和载流重组有关；晶体管相对绝缘衬底形成一个电容，电荷在电容上积累，而造成许多不利的影晌。 ... 浮体效应（英语：Floating body effect）是在SOI技术中实现的晶体管与体势（body potential）相关的效应。晶体管在绝缘体层上形成一个电容。这个电容上聚集的电荷可能会产生负面效应，例如，开启结构上的寄生晶体管和关态泄漏电流（off-state leakages），造成更高的电流消耗，以防动态随机存取存储器丢失信息。它也造成历史效应（英语：history effect），即晶体管与之前状态阈值电压有关的效应。在模拟电路器件中，浮体效应被称作扭结效应（英语：Kink effect）。1 原理 浮体效应（Floating body effect)是把硅放在绝缘体上做成的晶体管存在的效应，它的体势及偏压和载流子复合过程有关；晶体管相对衬底形成一个电容。电荷在电容上枳累，而造成不利的效应。例如：在结构上造成寄生晶体管，而造成漏电；引起较高电流损耗。在DRAM情况下，引起存储单元的信息丢失；它也可引起历史效应（History effect），即晶体管的阈值电压依赖它以前的状态。在模拟器件中，浮体效应称为扭结效应（Kink effect）。 相应的浮体效应测量，包括用全耗尽（Fully depleted）器件，在器件的绝缘层比沟道（Channe）线宽还要薄，因而，晶体管的电荷和体势是固定的，但在全耗尽器件中，最坏的是短沟道道（Short-channel）效应。因而，在一些模拟器件中，这样的架构并不适合，源和漏电位较高的情况下，晶体管的体（body）仍可充电。另外一种办法是用混合沟（Hybrid trench）绝缘。1 SOI SOI全名为Silicon On Insulator，是指硅晶体管结构在绝缘体之上的意思，原理就是在硅晶体管之间，加入绝缘体物质，可使两者之间的寄生电容比原来的少上一倍。优点是可以较易提升时脉，并减少电流漏电成为省电的IC，在工艺上还可以省略部分光掩模以节省成本，因此不论在工艺上或是电路上都有其优势。 ... 本词条内容贡献者为: 王沛 - 副教授、副研究员 - 中国科学院工程热物理研究所",
+        "page": null,
+        "date": "2018-11-22T16:00:00+00:00",
+        "retrieved_at": "2026-11-13T16:22:35.289052+08:00"
+      },
+      {
+        "type": "web",
+        "source": "[科普中国]-浮体效应",
+        "url": "https://www.kepuchina.cn/article/articleinfo?business_type=100&classify=0&ar_id=188925",
+        "text": "# [科普中国]-浮体效应 ... 浮体效应（Floating body effect)是把硅放到绝缘体上做成的晶体管，它的体势及偏压和载流重组有关；晶体管相对绝缘衬底形成一个电容，电荷在电容上积累，而造成许多不利的影晌。 简介 浮体效应（英语：Floating body effect）是在SOI技术中实现的晶体管与体势（body potential）相关的效应。晶体管在绝缘体层上形成一个电容。这个电容上聚集的电荷可能会产生负面效应，例如，开启结构上的寄生晶体管和关态泄漏电流（off-state leakages），造成更高的电流消耗，以防动态随机存取存储器丢失信息。它也造成历史效应（英语：history effect），即晶体管与之前状态阈值电压有关的效应。在模拟电路器件中，浮体效应被称作扭结效应（英语：Kink effect）。1 原理 浮体效应（Floating body effect)是把硅放在绝缘体上做成的晶体管存在的效应，它的体势及偏压和载流子复合过程有关；晶体管相对衬底形成一个电容。电荷在电容上枳累，而造成不利的效应。例如：在结构上造成寄生晶体管，而造成漏电；引起较高电流损耗。在DRAM情况下，引起存储单元的信息丢失；它也可引起历史效应（History effect），即晶体管的阈值电压依赖它以前的状态。在模拟器件中，浮体效应称为扭结效应（Kink effect）。 相应的浮体效应测量，包括用全耗尽（Fully depleted）器件，在器件的绝缘层比沟道（Channe）线宽还要薄，因而，晶体管的电荷和体势是固定的，但在全耗尽器件中，最坏的是短沟道道（Short-channel）效应。因而，在一些模拟器件中，这样的架构并不适合，源和漏电位较高的情况下，晶体管的体（body）仍可充电。另外一种办法是用混合沟（Hybrid trench）绝缘。1 SOI SOI全名为Silicon On Insulator，是指硅晶体管结构在绝缘体之上的意思，原理就是在硅晶体管之间，加入绝缘体物质，可使两者之间的寄生电容比原来的少上一倍。 ... 本词条内容贡献者为: 王沛 - 副教授、副研究员 - 中国科学院工程热物理研究所",
+        "page": null,
+        "date": "2021-12-30T16:00:00+00:00",
+        "retrieved_at": "2026-11-13T16:22:35.289052+08:00"
+      }
+    ]
+  }
+]

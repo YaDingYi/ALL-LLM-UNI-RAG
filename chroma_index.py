@@ -182,6 +182,69 @@ def _get_ready_collection(name):
     return collection, count
 
 
+def cleanup_old_indexes(keep_name):
+    '''保留最新的可用知识库，删除其他已完成的知识库集合。
+
+    保留集合在删除前必须通过模型、维度、距离及片段数校验，而且必须是
+    最新可用集合。未完成集合可能正在由其他进程构建，不在这里删除。
+    删除结果逐项返回；删除失败时调用者应向用户报告，不能声称清理完成。
+    调用方需保证本进程的更新和清理操作串行执行。
+    '''
+    # 保留对象不可用时直接终止，确保不会删除唯一可查询的集合。
+    collection, _ = _get_ready_collection(keep_name)
+    ready = list_indexes()
+    # 旧版本不应清掉更新版本；清理前再次检查当前最新可用集合。
+    if not ready or ready[0] != keep_name:
+        raise ValueError("保留的知识库不是最新可用集合，已停止清理。")
+
+    # 从保留集合读出一个已有向量，并直接查询，验证向量索引确实可用。
+    # 全程只使用本地已有向量，不加载嵌入模型、不发送任何数据到网络。
+    sample = collection.get(limit=1, include=["embeddings"])
+    vectors = sample.get("embeddings")
+    if len(sample.get("ids", [])) != 1 or vectors is None or len(vectors) != 1:
+        raise ValueError("最新知识库无法读取已有向量，已停止清理。")
+    vector = vectors[0].tolist() if hasattr(vectors[0], "tolist") else list(vectors[0])
+    _validate_vector(vector)
+    probe = collection.query(query_embeddings=[vector], n_results=1, include=["distances"])
+    distances = probe.get("distances")
+    if (not probe.get("ids") or not probe["ids"][0] or distances is None
+            or not distances or not distances[0] or not isfinite(distances[0][0])):
+        raise ValueError("最新知识库无法完成向量检索，已停止清理。")
+
+    # 先建立待清理名称快照，明确只处理本项目的kb-命名空间。
+    client = _client()
+    old_names = [name for name in ready if name != keep_name]
+    skipped_unready = []
+    for item in client.list_collections():
+        name = item if isinstance(item, str) else item.name
+        if isinstance(name, str) and name.startswith("kb-") and name not in ready:
+            # 未完成的集合可能仍在创建中，不能当作旧版本删除。
+            skipped_unready.append(name)
+    result = {"kept": keep_name, "deleted": [], "failed": [],
+              "skipped_unready": sorted(skipped_unready), "aborted": False}
+
+    # 每次删除前重新确认保留对象仍完整、仍是最新，减小并发更新风险。
+    for name in old_names:
+        try:
+            _get_ready_collection(keep_name)
+            current = list_indexes()
+            if not current or current[0] != keep_name:
+                raise ValueError("最新知识库发生变化。")
+        except Exception as error:
+            # 已删除的项保留在结果里；尚未执行的删除全部停止。
+            result["aborted"] = True
+            result["failed"].append({"name": name, "error_type": type(error).__name__})
+            break
+        try:
+            # Chroma删除的是该集合，不删除原始资料、历史和其他命名空间。
+            client.delete_collection(name)
+            result["deleted"].append(name)
+        except Exception as error:
+            # 一个集合删除失败不阻止其他旧集合继续清理。
+            result["failed"].append({"name": name, "error_type": type(error).__name__})
+    return result
+
+
 def search_index(question, index_name, top_k=3):
     '''将问题向量交给 Chroma 查询，返回片段及余弦相似度。'''
     if not isinstance(question, str) or not question.strip():

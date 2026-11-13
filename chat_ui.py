@@ -1,12 +1,13 @@
 '''显示聊天消息、模型用量及知识库参考片段。'''
 
 import streamlit as st
+from urllib.parse import urlsplit
 
 
 def show_message(message):
     '''显示一条消息；助手回答还显示保存的模型名称和 Token 用量。'''
     with st.chat_message(message["role"]):
-        st.text(message["content"])
+        st.markdown(message["content"])
         if message["role"] == "assistant":
             # 达到长度限制时保留已有正文，并提醒回答可能尚未完成；历史也能显示此提示。
             if message.get("finish_reason") == "length":
@@ -37,6 +38,22 @@ def show_message(message):
                 with st.expander("查看本次参考片段"):
                     for rank, source in enumerate(sources, start=1):
                         if not isinstance(source, dict):
+                            continue
+                        if source.get("type") == "web":
+                            # 网络结果与本地片段共享编号，标明摘要来源和可用发布时间。
+                            date = f" · 发布：{source['date']}" if source.get("date") else ""
+                            retrieved_at = f" · 搜索：{source['retrieved_at']}" if source.get("retrieved_at") else ""
+                            st.text(f"[{rank}] 互联网搜索摘要：{source.get('source', '未知')}{date}{retrieved_at}")
+                            url = source.get("url", "")
+                            # 只呈现合法的HTTP(S)链接，兼容可能存在的旧历史文件。
+                            if isinstance(url, str):
+                                try:
+                                    parsed = urlsplit(url)
+                                    if parsed.scheme in ("http", "https") and parsed.hostname and not parsed.username and not parsed.password:
+                                        st.link_button("打开网页", url)
+                                except ValueError:
+                                    pass
+                            st.text(source.get("text", ""))
                             continue
                         page = f" · PDF 第 {source['page']} 页" if source.get("page") is not None else ""
                         score = source.get("score")
